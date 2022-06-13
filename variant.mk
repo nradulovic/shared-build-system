@@ -26,29 +26,29 @@ ARCH ?= x86
 $(info VARIANT: $(PLATFORM)-$(PROFILE)-$(OS)-$(CPU)-$(ARCH))
 
 # NOTE: Load specified CPU
-include $(WS)/build/va_build/cpu_$(CPU).mk
--include $(WS)/build/va_build/$(PLATFORM)_cpu_$(CPU).mk
+include $(WS)/build/sbs/variant/cpu_$(CPU).mk
+-include $(WS)/build/sbs/variant/$(PLATFORM)_cpu_$(CPU).mk
 
 # NOTE: Load specified ARCH
-include $(WS)/build/va_build/arch_$(ARCH).mk
--include $(WS)/build/va_build/$(PLATFORM)_arch_$(ARCH).mk
+include $(WS)/build/sbs/variant/arch_$(ARCH).mk
+-include $(WS)/build/sbs/variant/$(PLATFORM)_arch_$(ARCH).mk
 
 # NOTE: Load specified OS
-include $(WS)/build/va_build/os_$(OS).mk
--include $(WS)/build/va_build/$(PLATFORM)_os_$(OS).mk
+include $(WS)/build/sbs/variant/os_$(OS).mk
+-include $(WS)/build/sbs/variant/$(PLATFORM)_os_$(OS).mk
 
 # NOTE: Load specified PROFILE
-include $(WS)/build/va_build/profile_$(PROFILE).mk
--include $(WS)/build/va_build/$(PLATFORM)_profile_$(PROFILE).mk
+include $(WS)/build/sbs/variant/profile_$(PROFILE).mk
+-include $(WS)/build/sbs/variant/$(PLATFORM)_profile_$(PROFILE).mk
 
 # NOTE: Load specified PLATFORM
-include $(WS)/build/va_build/platform_$(PLATFORM).mk
+include $(WS)/build/sbs/variant/platform_$(PLATFORM).mk
 
 # From ADD_NPORT_FEATURE set substract DEL_NPORT_FEATURE set
 NPORT_FEATURE_LIST = $(filter-out $(sort $(DEL_NPORT_FEATURE)), $(sort $(ADD_NPORT_FEATURE)))
 
 # Include only filtered include files
-NPORT_FEATURES = $(NPORT_FEATURE_LIST:%=$(WS)/build/va_build/$(PLATFORM)_feature_%.mk)
+NPORT_FEATURES = $(NPORT_FEATURE_LIST:%=$(WS)/build/sbs/variant/$(PLATFORM)_feature_%.mk)
 
 
 include $(NPORT_FEATURES)

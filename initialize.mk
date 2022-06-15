@@ -49,7 +49,7 @@ $(call check_defined, PROJECT_NAME, PROJECT_NAME is project name)
 DEF_EXTERNAL_DIR = external
 
 # Documentation defaults
-DEF_DOX_O        = documentation/generated
+DEF_DOX_O        = ../generated/documentation
 DEF_DOX_HTML_O   = html
 DEF_DOX_LATEX_O  = latex
 DEF_DOX_PROJECT  = documentation/$(MOD_NAME)_doxyfile
@@ -63,12 +63,12 @@ DEPENDS          = $(patsubst %.o,%.d,$(OBJECTS))
 PREPROCESSED     = $(patsubst %.o,%.i,$(OBJECTS))
 
 # Common build variables
-DEF_BUILD_DIR   = generated
-DEF_PACK_DIR    = packed
+DEF_BUILD_DIR   = ../generated
+DEF_PACK_DIR    = ../packed
 
 # Create possible targets
 PROJECT_NAME   ?= undefined
-PROJECT_CONFIG ?= configuration/template
+PROJECT_CONFIG ?= template/configuration
 PROJECT_ELF     = $(DEF_BUILD_DIR)/$(PROJECT_NAME).elf
 PROJECT_LIB     = $(DEF_BUILD_DIR)/$(PROJECT_NAME).a
 PROJECT_FLASH   = $(DEF_BUILD_DIR)/$(PROJECT_NAME).hex

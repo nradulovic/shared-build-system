@@ -10,11 +10,6 @@ endif
 # Define ALL rule.
 all: size
 
-clean: clean-size clean-flash
-
-distclean: clean
-	$(VERBOSE)rm -rf $(DEF_BUILD_DIR)
-
 .PHONY: flash
 flash: $(PROJECT_FLASH)
 	$(PRINa) "FLASH: $<"

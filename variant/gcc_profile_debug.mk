@@ -17,3 +17,4 @@
 #
 
 CC_FLAGS += -g -O0
+CC_FLAGS += $(CC_OPTIMIZATION_D)

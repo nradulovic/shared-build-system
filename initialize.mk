@@ -15,8 +15,8 @@
 # this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-ifndef LIB_BUILD_COMMON_MK
-LIB_BUILD_COMMON_MK = 1
+ifndef SBS_INITIALIZE_INCLUDED
+SBS_INITIALIZE_INCLUDED = 1
 
 # == Functions ==
 # Check that given variables are set and all have non-empty values,
@@ -42,78 +42,36 @@ safe_include = \
         $(shell echo $1))
 
 $(call check_defined, WS, WS is relative path to Neon build directory)
-$(call check_defined, PROJECT_DIR, PROJECT_DIR is project root source directory)
 $(call check_defined, PROJECT_NAME, PROJECT_NAME is project name)
 
-# Project directory structure
-DEF_EXTERNAL_DIR = external
-
-# Documentation defaults
-DEF_DOX_O        = ../generated/documentation
-DEF_DOX_HTML_O   = html
-DEF_DOX_LATEX_O  = latex
-DEF_DOX_PROJECT  = documentation/$(MOD_NAME)_doxyfile
-DEF_DOX_BASE     = $(WS)/documentation/base_doxyfile
-DEF_DOXYFILE	 = $(DEF_DOX_O)/doxyfile
+include $(WS)/build/sbs/definitions.mk
 
 # Builder helper variables
-OBJECTS          = $(patsubst %.c,$(DEF_BUILD_DIR)/%.o,$(CC_SOURCES))
-OBJECTS         += $(patsubst %.S,$(DEF_BUILD_DIR)/%.o,$(AS_SOURCES))
-DEPENDS          = $(patsubst %.o,%.d,$(OBJECTS))
-PREPROCESSED     = $(patsubst %.o,%.i,$(OBJECTS))
-
-# Common build variables
-DEF_BUILD_DIR   = ../generated
-DEF_PACK_DIR    = ../packed
+OBJECTS          	 = $(patsubst %.c,$(WS)/$(DEF_GENERATED_DIR)/%.o,$(CC_SOURCES))
+OBJECTS         	+= $(patsubst %.S,$(WS)/$(DEF_GENERATED_DIR)/%.o,$(AS_SOURCES))
+DEPENDS          	 = $(patsubst %.o,%.d,$(OBJECTS))
+PREPROCESSED     	 = $(patsubst %.o,%.i,$(OBJECTS))
 
 # Create possible targets
-PROJECT_NAME   ?= undefined
-PROJECT_CONFIG ?= template/configuration
-PROJECT_ELF     = $(DEF_BUILD_DIR)/$(PROJECT_NAME).elf
-PROJECT_LIB     = $(DEF_BUILD_DIR)/$(PROJECT_NAME).a
-PROJECT_FLASH   = $(DEF_BUILD_DIR)/$(PROJECT_NAME).hex
-PROJECT_SIZE    = $(DEF_BUILD_DIR)/$(PROJECT_NAME).siz
-
-# Handle the verbosity argument
-# If the argument is not given assume that verbosity is off.
-V ?= 0
-ifeq ("$(V)","1")
-VERBOSE         := # Empty space
-PRINT           := @true # Empty space
-else ifeq ("$(V)","0")
-VERBOSE         := @ # Empty space
-PRINT           := @echo # Empty space
-MAKEFLAGS       += -s
-else
-$(error Specify either `V=0` or `V=1`)
-endif
+PROJECT_NAME    	?= undefined
+PROJECT_CONFIG  	?= template/configuration
+PROJECT_ELF   		 = $(WS)/$(DEF_GENERATED_DIR)/$(PROJECT_NAME).elf
+PROJECT_LIB     	 = $(WS)/$(DEF_GENERATED_DIR)/$(PROJECT_NAME).a
+PROJECT_FLASH   	 = $(WS)/$(DEF_GENERATED_DIR)/$(PROJECT_NAME).hex
+PROJECT_SIZE    	 = $(WS)/$(DEF_GENERATED_DIR)/$(PROJECT_NAME).siz
+PROJECT_DOXYFILE_HTML 	= $(WS)/build/$(PROJECT_NAME).html.Doxyfile
+PROJECT_DOXYFILE_PDF  	= $(WS)/build/$(PROJECT_NAME).pdf.Doxyfile
 
 # This is the default target
 .PHONY: all
 all:
 
 .PHONY: clean
-clean:
+clean: clean-size clean-flash
 
 .PHONY: clean-objects
 clean-objects: 
 	$(VERBOSE)rm -f $(OBJECTS) $(DEPENDS)
-
-.PHONY: documentation
-documentation: html pdf 
-
-.PHONY: documentation-clean
-documentation-clean: html-clean pdf-clean
-	$(VERBOSE)rm -rf $(DEF_DOX_O)
-	$(PRINT) "Documentation cleaned up"
-
-.PHONY: html
-html: $(DEF_DOXYFILE)
-	@echo "GENERATE_HTML = YES" >> $(DEF_DOXYFILE)
-	$(PRINT) "Generating HTML documentation..."
-	$(VERBOSE)doxygen $< >/dev/null
-	@echo
-	$(PRINT) "HTML generated in $(DEF_DOX_O)/$(DEF_DOX_HTML_O)"
 
 .PHONY: clean-lib
 clean-lib: clean-objects
@@ -135,74 +93,83 @@ clean-flash: clean-elf
 	$(PRINT) "Cleaning flash binary file..."
 	$(VERBOSE)rm -rf $(PROJECT_FLASH)
 
-.PHONY: html-clean
-html-clean:
+distclean: clean
+	$(PRINT) "Removing $(WS)/$(DEF_GENERATED_DIR) directory..."
+	$(VERBOSE)rm -rf $(WS)/$(DEF_GENERATED_DIR)
+	
+.PHONY: documentation
+documentation: html pdf 
+
+.PHONY: clean-documentation
+clean-documentation: clean-html clean-pdf
+	$(VERBOSE)rm -rf $(DEF_DOX_O)
+	$(PRINT) "Documentation cleaned up"
+
+.PHONY: html
+html: $(WS)/$(DEF_DOX_O_DIR)
+	$(PRINT) "Generating HTML documentation..."
+	$(VERBOSE)doxygen $(PROJECT_DOXYFILE_HTML) >/dev/null
+	$(PRINT) "HTML generated in $(WS)/$(DEF_DOX_O_DIR)/$(DEF_DOX_HTML_O)"
+
+.PHONY: clean-html
+clean-html:
 	$(PRINT) "Cleaning HTML documentation..."
-	$(VERBOSE)rm -rf $(DEF_DOX_O)/$(DEF_DOX_HTML_O)
+	$(VERBOSE)rm -rf $(WS)/$(DEF_DOX_O_DIR)/$(DEF_DOX_HTML_O)
 
 .PHONY: pdf
-pdf: $(DEF_DOXYFILE)
-	@echo "GENERATE_LATEX = YES" >> $(DEF_DOXYFILE)	
+pdf: $(WS)/$(DEF_DOX_O_DIR)
 	$(PRINT) "Generating PDF documentation..."
-	$(VERBOSE)doxygen $< >/dev/null
-	$(VERBOSE)$(MAKE) -C $(DEF_DOX_O)/$(DEF_DOX_LATEX_O)
-	@echo
-	$(PRINT) "PDF generated in $(DEF_DOX_O)/$(DEF_DOX_LATEX_O)"
+	$(VERBOSE)doxygen $(PROJECT_DOXYFILE_PDF) >/dev/null
+	$(VERBOSE)$(MAKE) -C $(WS)/$(DEF_DOX_O_DIR)/$(DEF_DOX_LATEX_O)
+	$(PRINT) "PDF generated in $(WS)/$(DEF_DOX_O_DIR)/$(DEF_DOX_LATEX_O)"
 
-.PHONY: pdf-clean
-pdf-clean:
+.PHONY: clean-pdf
+clean-pdf:
 	$(PRINT) "Cleaning PDF documentation..."
-	$(VERBOSE)rm -rf $(DEF_DOX_O)/$(DEF_DOX_LATEX_O)
+	$(VERBOSE)rm -rf $(WS)/$(DEF_DOX_O_DIR)/$(DEF_DOX_LATEX_O)
 
-.PHONY: $(DEF_DOXYFILE)
-$(DEF_DOXYFILE): $(DEF_DOX_PROJECT) $(DEF_DOX_BASE)
-	$(PRINT) "Generating Doxyfile..."
-	@mkdir -p $(dir $@)
-	@cat $(DEF_DOX_BASE) > $@
-	@cat $(DEF_DOX_PROJECT) >> $@
-	@echo "PROJECT_NUMBER = '$(GIT_VERSION)'" >> $@
-	@echo "OUTPUT_DIRECTORY = $(DEF_DOX_O)" >> $@
-	@echo "HTML_OUTPUT = $(DEF_DOX_HTML_O)" >> $@
-	@echo "LATEX_OUTPUT = $(DEF_DOX_LATEX_O)" >> $@
-
+$(WS)/$(DEF_DOX_O_DIR):
+	$(VERBOSE)$(MKDIR) -p $<
+	
 .PHONY: help
 help:
-	@echo "Neon Makefile help for module '$(MOD_NAME)'"
-	@echo
-	@echo "This module depends on the following modules: $(MOD_DEPS)"
+	@echo "Neon Makefile help for project: '$(PROJECT_NAME)'"
 	@echo
 	@echo "== BUILD INFORMATION =="
 	@echo "Targets:"
 	@echo "  all                - Build lib and documentation."
-	@echo "  clean              - Clean the build directory."
-	@echo "  lib                - Build static PicoBlocks library."
+	@echo "  clean              - Clean the generated directory contents."
+	@echo "  library            - Build static library."
 	@echo "  documentation      - Generate HTML and PDF documentation."
 	@echo "  help               - Print this screen."
 	@echo
 	@echo "Generic arguments:"
-	@echo "  V                  - Set verbosity level (default: $(DEF_V)):"
+	@echo "  V                  - Set verbosity level (default: $(V)):"
 	@echo "                         0 - silent,"
 	@echo "                         1 - verbose."
-	@echo "  PROFILE            - Make code in (default: $(PROFILE)):"
-	@echo "                         release,"
-	@echo "                         debug mode."
 	@echo
 	@echo "Port arguments:"
 	@echo "  PLATFORM           - Build for specific platform."
 	@echo "                       (default: $(PLATFORM))"
+	@echo "  PROFILE            - Build for specific compilation profile."
+	@echo "                       (default: $(PROFILE))"
 	@echo "  ARCH               - Build for specific CPU architecture."
 	@echo "                       (default: $(ARCH))"
+	@echo "  CPU                - Build for specific CPU type."
+	@echo "                       (default: $(CPU))"
+	@echo "  OS                 - Build for specific OS family."
+	@echo "                       (default: $(OS))"
 	@echo
 	@echo "Compiler variables:"
-	@echo "  CFLAGS             - Compiler common flags."
-	@echo "  COPTIMIZATION_D    - Compiler optimization flags for"
+	@echo "  CC_FLAGS           - Compiler common flags."
+	@echo "  CC_OPTIMIZATION_D  - Compiler optimization flags for"
 	@echo "                       debug profile."
-	@echo "  COPTIMIZATION_R    - Compiler optimization flags for"
+	@echo "  CC_OPTIMIZATION_R  - Compiler optimization flags for"
 	@echo "                       release profile."
 	@echo
 	@echo "Linker variables:"
-	@echo "  LDFLAGS            - Linker common flags."
-	@echo "  LDLIBS             - Linker additional libraries."
+	@echo "  LD_FLAGS           - Linker common flags."
+	@echo "  LD_LIBS          	- Linker additional libraries."
 	@echo
 	@echo "Usage example:"
 	@echo "  make PLATFORM=$(PLATFORM) ARCH=$(ARCH) CC_FLAGS='-pedantic' V=1"
@@ -210,21 +177,12 @@ help:
 
 .PHONY: cc_include_paths
 cc_include_paths:
-ifdef NEON_ROOT
-	$(foreach i,$(CC_INCLUDES),$(info $(NEON_ROOT)/$(i)))
-else
 	$(foreach i,$(CC_INCLUDES),$(info $(WS)/$(i)))
-endif
 
 .PHONY: cc_sources
 cc_sources:
-ifdef NEON_ROOT
-	$(foreach i,$(CC_SOURCES),$(info $(NEON_ROOT)/$(i)))
-	$(foreach i,$(AS_SOURCES),$(info $(NEON_ROOT)/$(i)))
-else
 	$(foreach i,$(CC_SOURCES),$(info $(WS)/$(i)))
 	$(foreach i,$(AS_SOURCES),$(info $(WS)/$(i)))
-endif
 
 .PHONY: cc_flags
 cc_flags:
@@ -234,22 +192,6 @@ cc_flags:
 cc_defines:
 	$(foreach i,$(CC_DEFINES),$(info $(i)))
 
-.PHONY: package
-package: config
-	$(VERBOSE)for p in $(CC_INCLUDES); \
-    do \
-        dirs=$$(dirname $$(find $${p} -name *.h)); \
-        mkdir -pv $(DEF_PACK_DIR)/$${dirs}; \
-        cp -vr $(WS)/$${dirs} $(DEF_PACK_DIR)/$${p};\
-    done
-	$(VERBOSE)for file in $(CC_SOURCES); do \
-        mkdir -pv $$(dirname $(DEF_PACK_DIR)/$${file}); \
-        cp -v $(WS)/$${file} $(DEF_PACK_DIR)/$${file};\
-    done
-	$(VERBOSE)echo "Compiler flags  : " $(CC_FLAGS) > $(DEF_PACK_DIR)/settings.txt
-	$(VERBOSE)echo "Compiler defines: " $(CC_DEFINES) >> $(DEF_PACK_DIR)/settings.txt
-	$(VERBOSE)echo "Linker flags    : " $(LD_FLAGS) >> $(DEF_PACK_DIR)/settings.txt
-	
 #
 # Common library defines/includes/sources
 #

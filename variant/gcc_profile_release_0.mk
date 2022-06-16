@@ -18,3 +18,4 @@
 
 # GCC flag
 CC_FLAGS += -O0
+CC_FLAGS += $(CC_OPTIMIZATION_R)

@@ -82,7 +82,7 @@ $(WS)/$(DEF_GENERATED_DIR)/%.o: $(WS)/%.S
         $(AR_LIBS)
 
 # Rule to link object files to ELF executable.
-%.elf: $(LD_LIBS) $(AR_LIBS)
+%.elf: $(AR_LIBS)
 	$(PRINT) " [LD]: $@"
 	$(VERBOSE)$(LD) $(LD_FLAGS) -o $@ -Xlinker $^ $(LD_LIBS) $(AR_LIBS)
 

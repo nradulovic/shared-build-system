@@ -12,7 +12,7 @@ all: size
 
 .PHONY: flash
 flash: $(PROJECT_FLASH)
-	$(PRINa) "FLASH: $<"
+	$(PRINT) "FLASH: $<"
 
 .PHONY: size
 size: $(PROJECT_SIZE)

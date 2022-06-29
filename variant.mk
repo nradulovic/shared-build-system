@@ -23,7 +23,7 @@ OS ?= linux
 CPU ?= x86
 ARCH ?= x86
 
-$(info VARIANT: $(PLATFORM)-$(PROFILE)-$(OS)-$(CPU)-$(ARCH))
+$(info VARIANT [platform-profile-os-cpu-arch]: $(PLATFORM)-$(PROFILE)-$(OS)-$(CPU)-$(ARCH))
 
 # NOTE: Load specified CPU
 include $(WS)/build/sbs/variant/cpu_$(CPU).mk
@@ -45,10 +45,11 @@ include $(WS)/build/sbs/variant/profile_$(PROFILE).mk
 include $(WS)/build/sbs/variant/platform_$(PLATFORM).mk
 
 # From ADD_NPORT_FEATURE set substract DEL_NPORT_FEATURE set
-NPORT_FEATURE_LIST = $(filter-out $(sort $(DEL_NPORT_FEATURE)), $(sort $(ADD_NPORT_FEATURE)))
+VARIANT__FEATURE_LIST = $(filter-out $(sort $(VARIANT_DEL_FEATURES)), $(sort $(VARIANT_FEATURES)))
+
+$(info FEATURES: $(VARIANT__FEATURE_LIST))
 
 # Include only filtered include files
-NPORT_FEATURES = $(NPORT_FEATURE_LIST:%=$(WS)/build/sbs/variant/$(PLATFORM)_feature_%.mk)
+VARIANT__FEATURE_INCLUDES = $(VARIANT__FEATURE_LIST:%=$(WS)/build/sbs/variant/$(PLATFORM)_feature_%.mk)
 
-
-include $(NPORT_FEATURES)
+include $(VARIANT__FEATURE_INCLUDES)

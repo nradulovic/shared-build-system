@@ -26,23 +26,23 @@ ARCH ?= x86
 $(info VARIANT [platform-profile-os-cpu-arch]: $(PLATFORM)-$(PROFILE)-$(OS)-$(CPU)-$(ARCH))
 
 # NOTE: Load specified CPU
-include $(WS)/build/sbs/variant/cpu_$(CPU).mk
--include $(WS)/build/sbs/variant/$(PLATFORM)_cpu_$(CPU).mk
+include $(WS)/build/../external/sbs/variant/cpu_$(CPU).mk
+-include $(WS)/build/../external/sbs/variant/$(PLATFORM)_cpu_$(CPU).mk
 
 # NOTE: Load specified ARCH
-include $(WS)/build/sbs/variant/arch_$(ARCH).mk
--include $(WS)/build/sbs/variant/$(PLATFORM)_arch_$(ARCH).mk
+include $(WS)/build/../external/sbs/variant/arch_$(ARCH).mk
+-include $(WS)/build/../external/sbs/variant/$(PLATFORM)_arch_$(ARCH).mk
 
 # NOTE: Load specified OS
-include $(WS)/build/sbs/variant/os_$(OS).mk
--include $(WS)/build/sbs/variant/$(PLATFORM)_os_$(OS).mk
+include $(WS)/build/../external/sbs/variant/os_$(OS).mk
+-include $(WS)/build/../external/sbs/variant/$(PLATFORM)_os_$(OS).mk
 
 # NOTE: Load specified PROFILE
-include $(WS)/build/sbs/variant/profile_$(PROFILE).mk
--include $(WS)/build/sbs/variant/$(PLATFORM)_profile_$(PROFILE).mk
+include $(WS)/build/../external/sbs/variant/profile_$(PROFILE).mk
+-include $(WS)/build/../external/sbs/variant/$(PLATFORM)_profile_$(PROFILE).mk
 
 # NOTE: Load specified PLATFORM
-include $(WS)/build/sbs/variant/platform_$(PLATFORM).mk
+include $(WS)/build/../external/sbs/variant/platform_$(PLATFORM).mk
 
 # From ADD_NPORT_FEATURE set substract DEL_NPORT_FEATURE set
 VARIANT__FEATURE_LIST = $(filter-out $(sort $(VARIANT_DEL_FEATURES)), $(sort $(VARIANT_FEATURES)))
@@ -50,6 +50,6 @@ VARIANT__FEATURE_LIST = $(filter-out $(sort $(VARIANT_DEL_FEATURES)), $(sort $(V
 $(info FEATURES: $(VARIANT__FEATURE_LIST))
 
 # Include only filtered include files
-VARIANT__FEATURE_INCLUDES = $(VARIANT__FEATURE_LIST:%=$(WS)/build/sbs/variant/$(PLATFORM)_feature_%.mk)
+VARIANT__FEATURE_INCLUDES = $(VARIANT__FEATURE_LIST:%=$(WS)/build/../external/sbs/variant/$(PLATFORM)_feature_%.mk)
 
 include $(VARIANT__FEATURE_INCLUDES)

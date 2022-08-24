@@ -1,5 +1,5 @@
 
-include $(WS)/build/sbs/variant.mk
+include $(WS)/build/../external/sbs/variant.mk
 
 $(info PROJECT: $(PROJECT_NAME))
 ifneq ("$(PROJECT_CONFIG)","")

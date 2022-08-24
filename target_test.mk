@@ -1,5 +1,5 @@
 
-include $(WS)/build/sbs/target_application.mk
+include $(WS)/build/../external/sbs/target_application.mk
 
 .PHONY: test
 test: $(PROJECT_ELF)

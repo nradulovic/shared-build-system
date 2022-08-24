@@ -44,7 +44,7 @@ safe_include = \
 $(call check_defined, WS, WS is relative path to Neon build directory)
 $(call check_defined, PROJECT_NAME, PROJECT_NAME is project name)
 
-include $(WS)/build/sbs/definitions.mk
+include $(WS)/build/../external/sbs/definitions.mk
 
 # Builder helper variables
 OBJECTS          	 = $(patsubst %.c,$(WS)/$(DEF_GENERATED_DIR)/%.o,$(CC_SOURCES))
